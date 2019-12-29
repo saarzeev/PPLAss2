@@ -30,16 +30,13 @@ class MyBackend:
     def get_recommendations(self, starting_location, time, num_of_recommendations):
         df = self._load_data_from_db(starting_location, time)
         recommendations = self._create_recommendations(df, time, starting_location, num_of_recommendations)
-        # return recommendations
+        return recommendations
 
     def _load_data_from_db(self, starting_location, time):
         delta_time_percentage = 0.1
 
         #Select all trips that have a duration within +-delta_time_percentage of the requested time.
-        query = "SELECT * FROM bikeShare WHERE TripDurationinmin  <= " \
-                + str(np.math.ceil(time * (1 + delta_time_percentage))) \
-                + " AND TripDurationinmin >= " \
-                + str(np.math.floor(time * (1 - delta_time_percentage)))
+        query = "SELECT * FROM bikeShare"
         cursor = self._conn.execute(query)
 
         #Construct dataframe
@@ -57,7 +54,8 @@ class MyBackend:
         df = self._score_trips(df, time)
         df.sort_values(by=['score'], ascending=False, inplace=True)
 
-        return df.head(num_of_recommendations)
+        df = df.head(num_of_recommendations)
+        return df
 
     def _filter_distance_parameter(self, df, start_location_df):
         x = start_location_df.iloc()[0]['StartStationLatitude']  # Get the requested starting point's latitude
@@ -70,14 +68,14 @@ class MyBackend:
         # print(df.shape)
         return df
 
-    def _score_trips(self, df, time):
+    def _score_trips(self, df, requested_time):
         time_difference_weight = 1
         distance_weight = 1
         df = df.groupby(['StartStationName', 'EndStationName']).agg({'dist': np.median, 'TripDurationinmin': np.median})
-        #df['score'] = np.sqrt(pow(df['StartStationLatitude'] - x, 2) + pow(df['StartStationLongitude'] - y, 2))
+        df['score'] = -(df['dist'] * distance_weight) - (np.abs(df['TripDurationinmin'] - requested_time) * time_difference_weight)
         return df
 
 
 nu = MyBackend()
 nu.initialize_db("BikeShare.csv")
-nu.get_recommendations('Oakland Ave',4, 5)
+print(nu.get_recommendations('5 Corners Library',4, 5))
