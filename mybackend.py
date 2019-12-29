@@ -1,7 +1,9 @@
 import csv
 import sqlite3
+import numpy as np
+import pandas as pd
 
-class MyBackend():
+class MyBackend:
     def __init__(self):
         self._conn = sqlite3.connect("lite.db")
 
@@ -9,7 +11,7 @@ class MyBackend():
         self._create_table_in_db()
         self.load_csv_into_db(path)
         self._conn.commit()
-        self._conn.close()
+        #self._conn.close()
 
     def _create_table_in_db(self):
         self._conn.execute(
@@ -25,6 +27,57 @@ class MyBackend():
             for data in reader:
                 cursor.execute(query, data)
 
+    def get_recommendations(self, starting_location, time, num_of_recommendations):
+        df = self._load_data_from_db(starting_location, time)
+        recommendations = self._create_recommendations(df, time, starting_location, num_of_recommendations)
+        # return recommendations
+
+    def _load_data_from_db(self, starting_location, time):
+        delta_time_percentage = 0.1
+
+        #Select all trips that have a duration within +-delta_time_percentage of the requested time.
+        query = "SELECT * FROM bikeShare WHERE TripDurationinmin  <= " \
+                + str(np.math.ceil(time * (1 + delta_time_percentage))) \
+                + " AND TripDurationinmin >= " \
+                + str(np.math.floor(time * (1 - delta_time_percentage)))
+        cursor = self._conn.execute(query)
+
+        #Construct dataframe
+        cols = [column[0] for column in cursor.description]
+        df = pd.DataFrame.from_records(data=cursor.fetchall(), columns=cols)
+        return df
+
+    def _create_recommendations(self, df, time, starting_location, num_of_recommendations):
+        start_location_df = df[df['StartStationName'] == starting_location]
+
+        if len(start_location_df) == 0:
+            return None
+
+        df = self._filter_distance_parameter(df, start_location_df)
+        df = self._score_trips(df, time)
+        df.sort_values(by=['score'], ascending=False, inplace=True)
+
+        return df.head(num_of_recommendations)
+
+    def _filter_distance_parameter(self, df, start_location_df):
+        x = start_location_df.iloc()[0]['StartStationLatitude']  # Get the requested starting point's latitude
+        y = start_location_df.iloc()[0]['StartStationLongitude']  # Get the requested starting point's longitude
+        # Calculate distance between requested point and other points
+        df['dist'] = np.sqrt(pow(df['StartStationLatitude'] - x, 2) + pow(df['StartStationLongitude'] - y, 2))
+        # print(df.shape)
+        # Keep only points within +-1KM
+        df = df.drop(df[df['dist'] > 0.001].index)
+        # print(df.shape)
+        return df
+
+    def _score_trips(self, df, time):
+        time_difference_weight = 1
+        distance_weight = 1
+        df = df.groupby(['StartStationName', 'EndStationName']).agg({'dist': np.median, 'TripDurationinmin': np.median})
+        #df['score'] = np.sqrt(pow(df['StartStationLatitude'] - x, 2) + pow(df['StartStationLongitude'] - y, 2))
+        return df
+
 
 nu = MyBackend()
 nu.initialize_db("BikeShare.csv")
+nu.get_recommendations('Oakland Ave',4, 5)
