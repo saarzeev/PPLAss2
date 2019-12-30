@@ -37,7 +37,6 @@ def get_recommendation():
     model = MyBackend()
     if valid:
         lst_recommendation = model.get_recommendations(startlocation, int(timeduration),int(k))
-        # TODO decide what to show if we got less recomendation than 'self.tb_rec_num.text'
         if len(lst_recommendation) == 0:
             return jsonify('The start location is not exists')
         else:

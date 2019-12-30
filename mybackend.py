@@ -95,7 +95,12 @@ class MyBackend:
     def _score_trips(self, df, requested_time):
         time_difference_weight = 1
         distance_weight = 1
+
+        #We only keep unique sets of starting and ending points.
         df = df.groupby(['StartStationName', 'EndStationName']).agg({'dist': np.median, 'TripDurationinmin': np.median})
+        #The score is comprised of the sum of:
+        # 1. minus the distance between the requested starting point (e.g., highest score is zero)
+        # 2. minus the delta between the requested duration and the median duration of the trip (e.g., highest score is zero).
         df['score'] = -(df['dist'] * distance_weight) - (np.abs(df['TripDurationinmin'] - requested_time) * time_difference_weight)
         return df
 

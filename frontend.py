@@ -42,7 +42,6 @@ class MyGrid(GridLayout):
             title = 'Recommendation Location'
             lst_recommendation = self.model.get_recommendations(self.tb_location.text, int(self.tb_spent.text),
                                                                 int(self.tb_rec_num.text))
-            # TODO decide what to show if we got less recomendation than 'self.tb_rec_num.text'
             if (len(lst_recommendation) == 0):
                 message = 'The start location is not exists'
             else:
