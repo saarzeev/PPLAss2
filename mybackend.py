@@ -5,7 +5,7 @@ import pandas as pd
 
 class MyBackend:
     def __init__(self):
-        self._conn = sqlite3.connect("lite.db")
+        self._conn = sqlite3.connect("database.db")
 
     def initialize_db(self, path):
         self._create_table_in_db()
@@ -29,14 +29,18 @@ class MyBackend:
 
     def get_recommendations(self, starting_location, time, num_of_recommendations):
         df = self._load_data_from_db(starting_location, time)
-        recommendations = self._create_recommendations(df, time, starting_location, num_of_recommendations)
+        df_recommendations = self._create_recommendations(df, time, starting_location, num_of_recommendations)
+        if df_recommendations is None:
+            return []
+        recommendations = df_recommendations.index.get_level_values('EndStationName').tolist()
         return recommendations
 
     def _load_data_from_db(self, starting_location, time):
         delta_time_percentage = 0.1
 
         #Select all trips that have a duration within +-delta_time_percentage of the requested time.
-        query = "SELECT * FROM bikeShare"
+        query = "SELECT * FROM bikeShare where StartStationName = '%s'" %(starting_location)
+
         cursor = self._conn.execute(query)
 
         #Construct dataframe
@@ -77,5 +81,5 @@ class MyBackend:
 
 
 nu = MyBackend()
-nu.initialize_db("BikeShare.csv")
+#nu.initialize_db("BikeShare.csv")
 print(nu.get_recommendations('5 Corners Library',4, 5))

@@ -1,0 +1,45 @@
+
+<MyGrid@GridLayout>:
+    tb_location: tb_location
+    tb_spent: tb_spent
+    tb_rec_num: tb_rec_num
+
+    GridLayout:
+        cols: 1
+        size: root.size
+
+        GridLayout:
+            cols: 2
+            Label:
+                text: 'What is your current location?'
+                valign: 'center'
+                text_size: self.size
+                size: self.texture_size
+
+            TextInput:
+                id: tb_location
+                multiline: False
+
+            Label:
+                text: 'How much time would you like to spend?'
+                valign: 'center'
+                text_size: self.size
+                size: self.texture_size
+
+            TextInput:
+                id: tb_spent
+                multiline: False
+
+            Label:
+                text: 'How much location recommendations would you like to receive?'
+                valign: 'center'
+                text_size: self.size
+                size: self.texture_size
+
+            TextInput:
+                id: tb_rec_num
+                multiline: False
+
+        Button:
+            text: 'Recommend me'
+            on_release: root.get_recommendation()
