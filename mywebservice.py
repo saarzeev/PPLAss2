@@ -13,18 +13,18 @@ def get_recommendation():
         try:
             int(time)
         except Exception:
-            return (False, 'time spent must be an integer and greater then 0')
+            return (False, 'Time spent must be an integer greater than 0')
         try:
             int(num)
         except Exception:
-            return (False, 'number of result must be an integer and greater then 0')
+            return (False, 'Number of results must be an integer greater than 0')
         try:
             if len(location) == 0:
                 raise Exception('Location has not been set')
             elif (int(time) <= 0):
-                raise Exception('time spent must be an integer and greater then 0')
+                raise Exception('Time spent must be an integer greater than 0')
             elif (int(num) <= 0):
-                raise Exception('number of result must be an integer and greater then 0')
+                raise Exception('Number of results must be an integer greater than 0')
         except Exception as e:
             return (False, e)
         return (True, None)
@@ -38,7 +38,7 @@ def get_recommendation():
     if valid:
         lst_recommendation = model.get_recommendations(startlocation, int(timeduration),int(k))
         if len(lst_recommendation) == 0:
-            return jsonify('The start location is not exists')
+            return jsonify('Starting location does not exist')
         else:
             return jsonify(lst_recommendation)
     else:
