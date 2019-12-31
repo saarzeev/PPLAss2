@@ -9,6 +9,7 @@ app = Flask(__name__)
 #http://127.0.0.1:5000/?startlocation=Oakland+Ave&timeduration=5&k=5
 @app.route('/',methods=['GET'])
 def get_recommendation():
+    # input validation
     def validate(location, time, num):
         try:
             int(time)
@@ -29,6 +30,7 @@ def get_recommendation():
             return (False, e)
         return (True, None)
 
+    # variables get
     startlocation = request.args.get('startlocation', '')
     timeduration = request.args.get('timeduration', '')
     k = request.args.get('k', '')

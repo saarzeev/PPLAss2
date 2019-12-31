@@ -45,17 +45,17 @@ class MyBackend:
                 cursor.execute(query, data)
 
     def get_recommendations(self, starting_location, time, num_of_recommendations):
-        df = self._load_data_from_db()
+        df = self._load_data_from_db(starting_location)
         df_recommendations = self._create_recommendations(df, time, starting_location, num_of_recommendations)
         if df_recommendations is None:
             return []
         recommendations = df_recommendations.index.get_level_values('EndStationName').tolist()
         return recommendations
 
-    def _load_data_from_db(self):
+    def _load_data_from_db(self,starting_location):
 
         #Load all trips to memory
-        query = "SELECT StartStationName, StartStationLatitude, StartStationLongitude, TripDurationinmin, EndStationName FROM bikeShare"
+        query = "SELECT StartStationName, StartStationLatitude, StartStationLongitude, TripDurationinmin, EndStationName FROM bikeShare where StartStationName = '%s'" %(starting_location)
 
         cursor = self._conn.execute(query)
 

@@ -7,15 +7,21 @@ from kivy.properties import ObjectProperty
 
 
 class MyGrid(GridLayout):
+    # location textbox
     tb_location = ObjectProperty(None)
+    # location time spent textbox
     tb_spent: ObjectProperty(None)
+    # location number of recommendation textbox
     tb_rec_num: ObjectProperty(None)
 
     def __init__(self, **kwargs):
         super(MyGrid, self).__init__()
+        # extracting model if exist
         self.model = kwargs.get('model', None)
 
+    #Button EventHandler
     def get_recommendation(self):
+        # input validation
         def validate(location, time, num):
             try:
                 int(time)
@@ -49,8 +55,14 @@ class MyGrid(GridLayout):
         else:
             title = 'Error'
 
+        #Empty TextBoxes
+        self.tb_location.text = ""
+        self.tb_spent.text = ""
+        self.tb_rec_num.text = ""
+
         Popup(title=title, size_hint=(None, None), size=(400, 400),
               content=Label(text=str(message), halign='center')).open()
+
 
 
 class MyApp(App):
@@ -60,6 +72,6 @@ class MyApp(App):
     def build(self):
         return MyGrid(model=MyBackend())
 
-
-app = MyApp()
-app.run()
+if __name__=='__main__':
+    app = MyApp()
+    app.run()
