@@ -55,7 +55,7 @@ class MyBackend:
     def _load_data_from_db(self,starting_location):
 
         #Load all trips to memory
-        query = "SELECT StartStationName, StartStationLatitude, StartStationLongitude, TripDurationinmin, EndStationName FROM bikeShare where StartStationName = '%s'" %(starting_location)
+        query = "SELECT StartStationName, StartStationLatitude, StartStationLongitude, TripDurationinmin, EndStationName FROM bikeShare"
 
         cursor = self._conn.execute(query)
 
